@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+    <meta charset="UTF-8">
+    <title>SAN Aqua Tech | Admin Panel Members</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0284c7;
+            --primary-dark: #0369a1;
+            --primary-light: #e0f2fe;
+            --danger: #ef4444;
+            --danger-light: #fee2e2;
+            --success: #10b981;
+            --success-light: #dcfce7;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+        }
+
+        * { box-sizing: border-box; transition: all 0.2s ease; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .admin-container {
+            width: 100%;
+            max-width: 1000px;
+            background: var(--card-bg);
+            padding: 35px;
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(2, 132, 199, 0.04);
+            margin: 40px auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            gap: 10px;
+        }
+
+        h1 { font-size: 24px; font-weight: 800; margin: 0; color: var(--text-main); letter-spacing: -0.5px; }
+
+        .back-btn {
+            text-decoration: none; color: var(--primary); font-weight: 700;
+            padding: 10px 18px; border-radius: 12px; background: var(--primary-light);
+            font-size: 14px; white-space: nowrap; display: inline-flex; align-items: center;
+        }
+        .back-btn:hover { background: #bae6fd; transform: translateY(-1px); }
+
+        .search-container {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 25px;
+            background: #ffffff;
+            padding: 10px;
+            border-radius: 16px;
+            border: 1.5px solid var(--border);
+            width: 100%;
+        }
+        .search-container:focus-within {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.08);
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 0;
+            padding: 12px 16px;
+            border: none;
+            outline: none;
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 15px;
+            background: transparent;
+        }
+
+        /* --- Loading Spinner CSS --- */
+        .btn-content { display: flex; align-items: center; justify-content: center; gap: 8px; }
+
+        .spinner {
+            display: inline-block;
+            width: 14px; height: 14px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 0.8s linear infinite;
+        }
+
+        /* Search & Table Spinners */
+        .search-btn .spinner, .btn-delete .spinner { display: none; }
+        .loading .spinner { display: inline-block; }
+        .loading .btn-text { display: none; }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .search-btn {
+            background: var(--primary);
+            color: white; border: none;
+            padding: 0 28px; border-radius: 12px;
+            font-weight: 700; cursor: pointer;
+            font-size: 14px; min-height: 45px;
+            box-shadow: 0 4px 12px rgba(2, 132, 199, 0.15);
+        }
+        .search-btn:hover { background: var(--primary-dark); }
+
+        /* Stats Loader */
+        .stats-wrapper {
+            background: var(--primary);
+            padding: 8px 16px;
+            border-radius: 10px;
+            color: white;
+            margin-bottom: 25px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            box-shadow: 0 4px 10px rgba(2, 132, 199, 0.1);
+        }
+
+        #statsLoader { width: 12px; height: 12px; }
+
+        .table-responsive {
+            overflow-x: auto;
+            border-radius: 18px;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.01);
+        }
+
+        table { width: 100%; border-collapse: collapse; background: white; min-width: 600px; }
+        th { background: #f8fafc; color: var(--text-muted); text-align: left; padding: 16px; font-size: 11px; text-transform: uppercase; border-bottom: 2px solid var(--border); letter-spacing: 0.5px; font-weight: 700; }
+        td { padding: 16px; border-bottom: 1px solid #f1f5f9; font-size: 14px; color: var(--text-main); }
+
+        .action-btns { display: flex; gap: 8px; }
+
+        .btn-control {
+            background: var(--success-light); color: var(--success); border: none;
+            padding: 8px 14px; border-radius: 10px; cursor: pointer; font-weight: 700; font-size: 12px;
+            text-decoration: none; display: flex; align-items: center;
+        }
+        .btn-control:hover { background: #bbf7d0; }
+
+        .btn-delete {
+            background: var(--danger-light); color: var(--danger); border: none;
+            padding: 8px 14px; border-radius: 10px; cursor: pointer; font-weight: 700; font-size: 12px;
+            min-width: 75px; position: relative;
+        }
+        .btn-delete:hover { background: #fecaca; }
+        .btn-delete .spinner { border-top-color: var(--danger); border-color: rgba(239, 68, 68, 0.2); }
+
+        .city-badge { background: #f1f5f9; padding: 6px 10px; border-radius: 8px; font-size: 12px; font-weight: 600; color: #475569; }
+
+        @media (max-width: 480px) {
+            .search-container { flex-direction: column; background: transparent; border: none; padding: 0; gap: 10px; }
+            .search-input { background: #ffffff; border: 1.5px solid var(--border); border-radius: 14px; padding: 14px; }
+            .search-btn { padding: 14px; border-radius: 14px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="admin-container">
+    <header>
+        <h1>👥 User Management</h1>
+        <a href="index.html" class="back-btn">← Home</a>
+    </header>
+
+    <div class="search-container">
+        <input type="text" id="universalSearch" class="search-input" placeholder="Search by Name, Phone or City...">
+        <button class="search-btn" id="searchBtn">
+            <span class="btn-content">
+                <span class="btn-text">Search</span>
+                <div class="spinner"></div>
+            </span>
+        </button>
+    </div>
+
+    <div class="stats-wrapper">
+        Total Active Users: 
+        <span id="userCountContainer">
+            <div id="statsLoader" class="spinner"></div>
+            <strong id="userCount" style="display:none;">0</strong>
+        </span>
+    </div>
+
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th>Full Name</th>
+                    <th>Username</th>
+                    <th>Phone</th>
+                    <th>City</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="userList"></tbody>
+        </table>
+        <div id="emptyMsg" style="text-align:center; padding:45px; display:none; color: #94a3b8;">
+            <p style="font-size:36px; margin:0;">🔍</p>
+            <p style="font-size: 14px; font-weight: 600; margin-top: 10px;">தேடலுக்கு முடிவுகள் எதுவும் கிடைக்கவில்லை!</p>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, get, remove, child } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    // SAN Aqua Tech Firebase configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyAqyyGJt_t0ztknMudFVLmo6relkEa284g",
+        authDomain: "meadi-aqua-tech.firebaseapp.com",
+        databaseURL: "https://san-aqua-tech-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "meadi-aqua-tech",
+        storageBucket: "meadi-aqua-tech.firebasestorage.app",
+        messagingSenderId: "531151217708",
+        appId: "1:531151217708:web:b30b6e1a0bf7fa60f29d89"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    let allUsersData = [];
+
+    // 1. Fetch Users from SAN Aqua Tech Database
+    async function fetchUsers() {
+        const statsLoader = document.getElementById("statsLoader");
+        const userCountElem = document.getElementById("userCount");
+
+        if(statsLoader) statsLoader.style.display = "inline-block";
+        if(userCountElem) userCountElem.style.display = "none";
+
+        try {
+            const dbRef = ref(db);
+            const snapshot = await get(child(dbRef, `users`));
+            if (snapshot.exists()) {
+                const data = snapshot.val();
+                allUsersData = Object.keys(data).map(key => ({
+                    ...data[key],
+                    user: data[key].user || key 
+                }));
+            } else {
+                allUsersData = [];
+            }
+            renderTable(allUsersData);
+        } catch (error) {
+            console.error("Error fetching data from SAN Aqua Tech network:", error);
+        } finally {
+            if(statsLoader) statsLoader.style.display = "none";
+            if(userCountElem) userCountElem.style.display = "inline-block";
+        }
+    }
+
+    // 2. Render Table Structure
+    function renderTable(users) {
+        const userList = document.getElementById("userList");
+        const userCount = document.getElementById("userCount");
+        const emptyMsg = document.getElementById("emptyMsg");
+
+        if (!userList) return;
+
+        userList.innerHTML = "";
+        userCount.innerText = users.length;
+
+        if (users && users.length > 0) {
+            users.forEach((u) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong style="color: var(--text-main); font-weight: 700;">${u.name || '---'}</strong></td>
+                    <td style="color:#0284c7; font-weight: 600;">@${u.user || '---'}</td>
+                    <td style="font-weight: 500;">${u.phone || '---'}</td>
+                    <td><span class="city-badge">${u.city || '---'}</span></td>
+                    <td class="action-btns">
+                        <a href="control profile.html?user=${u.user}" class="btn-control">Control</a>
+                        <button class="btn-delete" data-username="${u.user}">
+                            <span class="btn-text">Delete</span>
+                            <div class="spinner"></div>
+                        </button>
+                    </td>
+                `;
+                userList.appendChild(row);
+            });
+            emptyMsg.style.display = "none";
+        } else {
+            emptyMsg.style.display = "block";
+        }
+
+        document.querySelectorAll('.btn-delete').forEach(btn => {
+            btn.onclick = () => deleteUser(btn, btn.getAttribute('data-username'));
+        });
+    }
+
+    // 3. Delete User from Database securely
+    async function deleteUser(btn, username) {
+        if(!username) return;
+        if(confirm(`"${username}" என்ற பயனரை நீக்க விரும்புகிறீர்களா?`)) {
+            btn.classList.add('loading');
+            try {
+                await remove(ref(db, 'users/' + username));
+                alert("பயனர் வெற்றிகரமாக நீக்கப்பட்டார்!");
+                fetchUsers(); 
+            } catch (error) {
+                alert("நீக்குவதில் பிழை ஏற்பட்டது.");
+                btn.classList.remove('loading');
+            }
+        }
+    }
+
+    // 4. Perform Live Search Filters
+    function performSearch() {
+        const btn = document.getElementById("searchBtn");
+        const searchInput = document.getElementById("universalSearch");
+        const query = searchInput.value.toLowerCase().trim();
+
+        btn.classList.add('loading');
+
+        setTimeout(() => {
+            try {
+                if (query === "") { 
+                    renderTable(allUsersData); 
+                } else {
+                    const filtered = allUsersData.filter(u => {
+                        const name = (u.name || "").toLowerCase();
+                        const user = (u.user || "").toLowerCase();
+                        const phone = (u.phone || "").toLowerCase();
+                        const city = (u.city || "").toLowerCase();
+
+                        return name.includes(query) || 
+                               user.includes(query) || 
+                               phone.includes(query) || 
+                               city.includes(query);
+                    });
+                    renderTable(filtered);
+                }
+            } catch (err) {
+                console.error("Search Action Error:", err);
+            } finally {
+                btn.classList.remove('loading');
+            }
+        }, 300);
+    }
+
+    document.getElementById("searchBtn").onclick = performSearch;
+    document.getElementById("universalSearch").onkeypress = (e) => { 
+        if(e.key === "Enter") performSearch(); 
+    };
+
+    fetchUsers();
+</script>
+
+</body>
+</html>

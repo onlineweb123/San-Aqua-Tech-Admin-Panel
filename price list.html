@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RO Billing | Meadi Aqua Tech</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --bg: #f8fbff; 
+            --card: #ffffff; 
+            --border: #e2e8f0; 
+            --primary: #0077b6; 
+            --accent: #00b4d8; 
+            --text-main: #1e293b;
+            --text-sub: #64748b;
+            --glass: rgba(255, 255, 255, 0.8);
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body { 
+            margin: 0; font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: var(--bg); color: var(--text-main); 
+        }
+
+        /* --- Header & Sidebar --- */
+        header { 
+            height: 70px; display: flex; align-items: center; justify-content: center; 
+            position: fixed; top: 0; left: 0; right: 0; 
+            background: var(--glass); backdrop-filter: blur(12px);
+            z-index: 100; border-bottom: 1px solid var(--border);
+        }
+
+        .header-title { font-size: 18px; font-weight: 700; color: var(--primary); }
+
+        .menu-btn { 
+            position: absolute; left: 20px; font-size: 24px; 
+            background: #f1f5f9; border: none; color: var(--text-main); 
+            cursor: pointer; width: 40px; height: 40px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .sidebar { 
+            width: 280px; background: var(--card); position: fixed; top: 0; bottom: 0; left: -300px; 
+            padding-top: 80px; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 110; 
+            box-shadow: 20px 0 50px rgba(0,0,0,0.05);
+        }
+        .sidebar.open { left: 0; }
+        .sidebar a { 
+            display: flex; align-items: center; padding: 16px 24px; text-decoration: none; 
+            color: var(--text-main); font-weight: 500; font-size: 15px;
+        }
+        .sidebar a:hover { background: #f8fafc; color: var(--primary); }
+
+        .overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.5); display: none; z-index: 105; backdrop-filter: blur(4px); }
+        .overlay.show { display: block; }
+
+        /* --- Main Content --- */
+        .main-container {
+            padding: 90px 15px 120px 15px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* --- Search Bar --- */
+        .search-box {
+            width: 100%;
+            padding: 14px 15px;
+            border-radius: 15px;
+            border: 1px solid var(--border);
+            font-family: inherit;
+            font-size: 14px;
+            margin-bottom: 20px;
+            outline: none;
+            background: #fff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        /* --- Table Styling --- */
+        .spares-card {
+            background: var(--card);
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            margin-bottom: 25px;
+        }
+
+        table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        th { background: #f1f5f9; color: var(--primary); text-align: left; padding: 15px; font-weight: 700; }
+        td { padding: 14px 15px; border-bottom: 1px solid #f1f5f9; }
+
+        .price-text { font-weight: 700; color: #059669; }
+
+        .add-btn {
+            background: #e0f2fe; color: var(--primary); border: none;
+            padding: 8px 16px; border-radius: 10px; font-size: 13px;
+            font-weight: 700; cursor: pointer; transition: 0.2s;
+        }
+
+        .add-btn.added { background: #059669; color: white; }
+
+        /* Service Charge Row */
+        .service-row { background: #fff4f4; }
+        .service-input {
+            width: 80px; padding: 6px; border-radius: 8px;
+            border: 1px solid #fecaca; text-align: right;
+            font-weight: 700; color: #b91c1c; outline: none;
+        }
+
+        /* Total Card */
+        .total-card {
+            background: linear-gradient(135deg, #1e293b, #334155);
+            border-radius: 20px;
+            padding: 25px;
+            color: white;
+            text-align: center;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .total-label { font-size: 14px; opacity: 0.8; margin-bottom: 5px; display: block; }
+        .total-amount { font-size: 32px; font-weight: 800; color: #38bdf8; }
+
+        /* --- Bottom Navigation --- */
+        .bottom {
+            height: 75px; position: fixed; bottom: 0; left: 0; right: 0; 
+            display: flex; justify-content: space-around; align-items: center; 
+            background: var(--glass); backdrop-filter: blur(12px);
+            border-top: 1px solid var(--border); z-index: 100; padding-bottom: env(safe-area-inset-bottom);
+        }
+        .bottom button {
+            background: none; border: none; font-size: 11px; font-weight: 600;
+            display: flex; flex-direction: column; align-items: center; color: var(--text-sub);
+            cursor: pointer;
+        }
+        .bottom button.active { color: var(--primary); }
+        .bottom .icon { font-size: 22px; margin-bottom: 4px; }
+
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+    </style>
+</head>
+<body>
+
+<header>
+    <button class="menu-btn" id="menuBtn">☰</button>
+    <div class="header-title">RO Spares Billing</div>
+</header>
+
+<div id="sidebar" class="sidebar">
+  <div style="padding: 20px; font-weight: 800; color: var(--primary); border-bottom: 1px solid var(--border);">ADMIN PANEL</div>
+  <a href="admin_index.html">🏠 Admin Home</a>
+  <a href="login members.html">👥 Members</a>
+  <a href="control profile.html">⚙️ Profile Settings</a>
+  <a href="customer detail.html">📒 Customer List</a>
+  <a href="online bill.html">🧾 Online Bill</a>
+  <a href="service list.html">👨‍🔧 Service List</a>
+
+
+  <a href="#" onclick="logoutAdmin()" style="color: var(--danger);">🚪 Logout</a>
+</div>
+
+<div id="overlay" class="overlay"></div>
+
+<div class="main-container">
+
+    <input type="text" id="searchInput" class="search-box" placeholder="🔍 Search spare parts..." onkeyup="filterSpares()">
+
+    <div class="spares-card">
+        <table id="sparesTable">
+            <thead>
+                <tr>
+                    <th>Spare Items</th>
+                    <th>Price</th>
+                    <th style="text-align: center;">Add</th>
+                </tr>
+            </thead>
+          <tbody>
+    <tr data-price="300"><td>Inlet Valve</td><td class="price-text">300</td><td align="center"><button class="add-btn" onclick="toggleItem(this, 300)">Add</button></td></tr>
+
+    <tr data-price="100"><td>Tube (1 Meter)</td><td class="price-text">100</td><td align="center"><button class="add-btn" onclick="toggleItem(this, 100)">Add</button></td></tr>
+
+    <tr data-price="300"><td>Spun Filter</td><td class="price-text">300</td><td align="center"><button class="add-btn" onclick="toggleItem(this, 300)">Add</button></td></tr>
+
+       <tr data-price="400"><td>Cendil Filter</td><td class="price-text">400</td><td align="center"><button class="add-btn" onclick="toggleItem(this, 400)">Add</button></td></tr>
+
+    <tr data-price="750"><td> Pre-Filter  Set <br>( Normal )</td><td class="price-text">750</td><td align="center"><button class="add-btn" onclick="toggleItem(this, 750)">Add</button></td></tr>
+
+    <tr data-price="950"><td> Pre-Filter  Set <br>( Virgin )</td><td class="price-text">950</td><td align="center"><button class="add-btn" onclick="toggleItem(this, 950)">Add</button></td></tr>
+
+      <tr data-price="1200"><td> Pre-Filter Set <br> ( Transparent ) </td><td class="price-text">1200</td><td align="center"><button class="add-btn" onclick="toggleItem(this, 1200)">Add</button></td></tr>
+
+    <tr data-price="550"><td>Pre-Carbon</td><td class="price-text">550</td><td align="center"><button class="add-btn" onclick="toggleItem(this, 550)">Add</button></td></tr>
+
+    <tr data-price="550"><td>Sediment</td><td class="price-text">550</td><td align="center"><button class="add-btn" onclick="toggleItem(this, 550)">Add</button></td></tr>
+
+        <tr data-price="550"><td>Post Carbon</td><td class="price-text">550</td><td align="center"><button class="add-btn" onclick="toggleItem(this, 550)">Add</button></td></tr>
+
+    <tr data-price="450"><td>S.V</td><td class="price-text">450</td><td align="center"><button class="add-btn" onclick="toggleItem(this, 450)">Add</button></td></tr>
+
+    <tr data-price="2500"><td>Pump</td><td class="price-text">2500</td><td align="center"><button class="add-btn" onclick="toggleItem(this, 2500)">Add</button></td></tr>
+
+    <tr data-price="2500"><td>Membrane</td><td class="price-text">2500</td><td align="center"><button class="add-btn" onclick="toggleItem(this, 2500)">Add</button></td></tr>
+
+    <tr data-price="450"><td>M.H</td><td class="price-text">450</td><td align="center"><button class="add-btn" onclick="toggleItem(this, 450)">Add</button></td></tr>
+
+    <tr data-price="250"><td>F.R</td><td class="price-text">250</td><td align="center"><button class="add-btn" onclick="toggleItem(this, 250)">Add</button></td></tr>
+
+    <tr data-price="300"><td>Float Set</td><td class="price-text">300</td><td align="center"><button class="add-btn" onclick="toggleItem(this, 300)">Add</button></td></tr>
+
+    <tr data-price="2000"><td>Cabinet (Body) <br>( Starting Model )</td><td class="price-text">2000</td><td align="center"><button class="add-btn" onclick="toggleItem(this, 2000)">Add</button></td></tr>
+
+    <tr data-price="450"><td>Stand</td><td class="price-text">450</td><td align="center"><button class="add-btn" onclick="toggleItem(this, 450)">Add</button></td></tr>
+
+    <tr data-price="950"><td>A.A / Alkaline</td><td class="price-text">950</td><td align="center"><button class="add-btn" onclick="toggleItem(this, 950)">Add</button></td></tr>
+
+    <tr data-price="950"><td>SMPS (Adapter)</td><td class="price-text">950</td><td align="center"><button class="add-btn" onclick="toggleItem(this, 950)">Add</button></td></tr>
+
+    <tr data-price="1200"><td>Mineral Cartridge</td><td class="price-text">1200</td><td align="center"><button class="add-btn" onclick="toggleItem(this, 1200)">Add</button></td></tr>
+
+    <tr data-price="200"><td>Tap</td><td class="price-text">200</td><td align="center"><button class="add-btn" onclick="toggleItem(this, 200)">Add</button></td></tr>
+
+    <tr data-price="200"><td>Cover</td><td class="price-text">200</td><td align="center"><button class="add-btn" onclick="toggleItem(this, 200)">Add</button></td></tr>
+
+    <tr class="service-row">
+        <td style="font-weight: 700; color: #b91c1c;">Service Charge</td>
+        <td colspan="2" align="right">
+            <span style="font-weight: 700; color: #b91c1c; margin-right: 5px;">₹</span>
+            <input type="number" id="serviceCharge" class="service-input" value="100" oninput="calculateTotal()">
+        </td>
+    </tr>
+</tbody>
+
+
+        </table>
+    </div>
+
+    <div class="total-card">
+        <span class="total-label">GRAND TOTAL</span>
+        <div class="total-amount">₹ <span id="grandTotal">100</span></div>
+    </div>
+
+</div>
+
+<div class="bottom">
+    <button onclick="location.href='admin_index.html'"><span class="icon">⚙️</span>Admin</button>
+    <button onclick="location.href='save data.html'"><span class="icon">📥</span>Save</button>
+    <button onclick="location.href='database.html'"><span class="icon">📊</span>DB</button>
+    <button onclick="location.href='index.html'"><span class="icon">📱</span>App</button>
+</div>
+
+<script>
+    // Sidebar logic
+    const menuBtn = document.getElementById("menuBtn");
+    const sidebar = document.getElementById("sidebar");
+    const overlay = document.getElementById("overlay");
+
+    const toggleMenu = () => {
+        sidebar.classList.toggle("open");
+        overlay.classList.toggle("show");
+    };
+
+    menuBtn.onclick = toggleMenu;
+    overlay.onclick = toggleMenu;
+
+    // Billing logic
+    let selectedTotal = 0;
+
+    function toggleItem(btn, price) {
+        if (btn.classList.contains('added')) {
+            btn.classList.remove('added');
+            btn.innerText = "Add";
+            selectedTotal -= price;
+        } else {
+            btn.classList.add('added');
+            btn.innerText = "Added";
+            selectedTotal += price;
+        }
+        calculateTotal();
+    }
+
+    function calculateTotal() {
+        const serviceCharge = parseFloat(document.getElementById('serviceCharge').value) || 0;
+        const finalTotal = selectedTotal + serviceCharge;
+        document.getElementById('grandTotal').innerText = finalTotal.toLocaleString('en-IN');
+    }
+
+    function filterSpares() {
+        let input = document.getElementById('searchInput').value.toLowerCase();
+        let rows = document.getElementById('sparesTable').getElementsByTagName('tr');
+
+        for (let i = 1; i < rows.length - 1; i++) {
+            let text = rows[i].innerText.toLowerCase();
+            rows[i].style.display = text.includes(input) ? "" : "none";
+        }
+    }
+</script>
+
+</body>
+</html>
