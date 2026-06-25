@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Bill Generator</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background-color: #f0f2f5;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #1a1a1a;
+            margin-bottom: 30px;
+            font-size: 1.8rem;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        .button-container {
+            display: flex;
+            gap: 20px;
+            width: 100%;
+            max-width: 800px; /* மூன்று பட்டன்கள் என்பதால் அகலத்தை கூட்டியுள்ளேன் */
+            flex-direction: column;
+        }
+
+        .btn {
+            width: 100%;
+            height: 120px;
+            font-size: 1.4rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            border-radius: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            letter-spacing: 1px;
+            text-align: center;
+        }
+
+        /* Photo Button */
+        .photo-btn {
+            background: linear-gradient(135deg, #00b09b, #96c93d);
+            color: white;
+        }
+
+        /* PDF Button */
+        .pdf-btn {
+            background: linear-gradient(135deg, #ff5f6d, #ffc371);
+            color: white;
+        }
+
+        /* Photo & PDF Button (புதிய பட்டன்) */
+        .both-btn {
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            color: white;
+        }
+
+        /* Hover & Touch Effects */
+        .btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        /* Tablet & Desktop screens */
+        @media (min-width: 600px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+            .button-container {
+                flex-direction: row; 
+                max-width: 900px;
+            }
+            .btn {
+                height: 150px;
+                flex: 1; /* மூன்று பட்டன்களும் சம அளவில் இருக்க */
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Online Quotation,Bill Generator</h1>
+
+    <div class="button-container">
+        <a href="online quotation.html" class="btn photo-btn">
+            Quotation
+        </a>
+
+        <a href="online bill pdf.html" class="btn pdf-btn">
+           Bill PDF & Photo
+        </a>
+
+    </div>
+
+</body>
+</html>
