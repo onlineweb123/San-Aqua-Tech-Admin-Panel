@@ -2,10 +2,10 @@
   "name": "Meadi Aqua Tech Admin",
   "short_name": "AquaTech Admin",
   "description": "Admin Portal for Meadi Aqua Tech Management",
-  "start_url": "index.html",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#f8fafc",
-  "theme-color": "#1e293b",
+  "theme_color": "#1e293b",
   "orientation": "portrait",
   "icons": [
     {
