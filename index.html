@@ -5,6 +5,12 @@
     <title>Welcome Admin | Meadi Aqua Tech</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <meta name="theme-color" content="#1e293b">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    
+    <link rel="manifest" href="manifest.json">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
 
     <style>
@@ -138,5 +144,14 @@
         <div class="system-tag">Meadi Aqua Tech • Management</div>
     </div>
 
-</body>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(reg => console.log('Service Worker Registered!', reg))
+                    .catch(err => console.log('Service Worker Error:', err));
+            });
+        }
+    </script>
+    </body>
 </html>
