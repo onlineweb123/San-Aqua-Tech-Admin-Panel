@@ -1,7 +1,14 @@
-const CACHE_NAME = 'aqua-tech-v1';
+const CACHE_NAME = 'aqua-tech-v2'; // வெர்ஷன் மாற்றப்பட்டுள்ளது
 const ASSETS = [
+  './',
   'index.html',
-  'admin.html'
+  'admin.html',
+  'icon-128×128.png',
+  'icon-144×144.png',
+  'icon-152×152.png',
+  'icon-192×192.png',
+  'icon-256×256.png',
+  'icon-512×512.png'
 ];
 
 // Install Service Worker
