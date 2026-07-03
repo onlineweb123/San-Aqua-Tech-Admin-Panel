@@ -1,7 +1,7 @@
 {
-  "name": "Meadi Aqua Tech Admin",
-  "short_name": "AquaAdmin",
-  "description": "Admin Panel for Meadi Aqua Tech",
+  "name": "San Aqua Tech Admin",
+  "short_name": "San Aqua Admin",
+  "description": "Admin Panel for San Aqua Tech",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#ffffff",
