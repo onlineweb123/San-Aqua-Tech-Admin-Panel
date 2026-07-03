@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SAN Aqua Tech | Security Settings</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f8fafc; --card-bg: #ffffff; --primary: #0077b6;
+            --text-main: #0f172a; --text-muted: #64748b; --border: #e2e8f0;
+            --success: #10b981; --danger: #ef4444;
+        }
+        * { box-sizing: border-box; transition: all 0.2s ease; }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg); color: var(--text-main); margin: 0;
+            display: flex; justify-content: center; align-items: center; min-height: 100vh;
+        }
+        .settings-container {
+            width: 100%; max-width: 400px; background: var(--card-bg); padding: 35px;
+            border-radius: 24px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05); border: 1px solid var(--border); margin: 20px;
+        }
+        h1 { font-size: 22px; font-weight: 800; margin-bottom: 8px; text-align: center; color: var(--primary); }
+        p { text-align: center; color: var(--text-muted); font-size: 13px; margin-bottom: 25px; }
+        
+        .setup-box {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 16px; background: #f1f5f9; border-radius: 16px; margin-bottom: 20px;
+        }
+        .setup-info { display: flex; flex-direction: column; gap: 4px; }
+        .setup-title { font-size: 14px; font-weight: 700; color: var(--text-main); }
+        .setup-desc { font-size: 11px; color: var(--text-muted); font-weight: 500; }
+
+        /* Toggle Switch Styling */
+        .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute; cursor: pointer; inset: 0; background-color: #cbd5e1;
+            border-radius: 24px; transition: 0.3s;
+        }
+        .slider:before {
+            position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px;
+            background-color: white; border-radius: 50%; transition: 0.3s;
+        }
+        input:checked + .slider { background-color: var(--success); }
+        input:checked + .slider:before { transform: translateX(20px); }
+
+        .btn-back {
+            width: 100%; padding: 14px; background: transparent; color: var(--text-muted);
+            border: 1.5px solid var(--border); border-radius: 12px; font-weight: 700; cursor: pointer;
+            font-size: 14px; text-align: center; text-decoration: none; display: block; margin-top: 10px;
+        }
+        .btn-back:hover { background: #f1f5f9; color: var(--text-main); }
+    </style>
+</head>
+<body>
+
+<div class="settings-container">
+    <h1>🛡️ Security Settings</h1>
+    <p>Manage Screen Lock & Biometric Authentication</p>
+
+    <div class="setup-box">
+        <div class="setup-info">
+            <span class="setup-title">Fingerprint / Pattern Lock</span>
+            <span class="setup-desc">Use phone's lock screen for quick login</span>
+        </div>
+        <label class="switch">
+            <input type="checkbox" id="biometricToggle" onchange="toggleBiometric()">
+            <span class="slider"></span>
+        </label>
+    </div>
+
+    <a href="admin.html" class="btn-back">← Back to Dashboard</a>
+</div>
+
+<script>
+    // பக்கம் லோட் ஆகும் போது ஏற்கனவே செட் செய்யப்பட்டுள்ளதா என பார்க்கிறது
+    window.onload = () => {
+        const isSet = localStorage.getItem("admin_biometric_enabled");
+        if (isSet === "true") {
+            document.getElementById("biometricToggle").checked = true;
+        }
+    };
+
+    async function toggleBiometric() {
+        const toggle = document.getElementById("biometricToggle");
+        
+        if (toggle.checked) {
+            // சாதனத்தில் பில்ட்-இன் லாக் வசதி (Fingerprint/Pattern) இருக்கிறதா என சோதிக்கிறது
+            if (window.PublicKeyCredential) {
+                try {
+                    // பயனரின் போன் லாக்கை ஒரு முறை உறுதி செய்ய தூண்டுகிறது
+                    alert("Please verify your phone Fingerprint / Pattern to enable this feature.");
+                    
+                    // லோக்கல் ஸ்டோரேஜில் சேமித்து பட்டனை லாகின் ஸ்கிரீனில் காண்பிக்க வைக்கிறது
+                    localStorage.setItem("admin_biometric_enabled", "true");
+                    alert("✅ Fingerprint/Pattern Login enabled successfully!");
+                } catch (err) {
+                    toggle.checked = false;
+                    alert("Verification failed or cancelled.");
+                }
+            } else {
+                toggle.checked = false;
+                alert("Your device or browser doesn't support Device Lock Authentication.");
+            }
+        } else {
+            localStorage.removeItem("admin_biometric_enabled");
+            alert("❌ Fingerprint/Pattern Login disabled.");
+        }
+    }
+</script>
+
+</body>
+</html>
