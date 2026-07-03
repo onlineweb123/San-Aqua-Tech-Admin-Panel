@@ -16,6 +16,14 @@
   <!-- Apple Touch Icon with correct naming -->
   <link rel="apple-touch-icon" href="icon-192x192.png">
   
+   <script>
+    
+        // Auth Check
+        if (sessionStorage.getItem("isAdminAuthenticated") !== "true") {
+            window.location.replace("admin login.html");
+        }
+    </script>
+
   <style>
     body {
       font-family: Arial, sans-serif;
