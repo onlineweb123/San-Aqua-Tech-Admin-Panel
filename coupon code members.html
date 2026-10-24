@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>San Aqua Tech | Admin Coupon Panel</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --bg: #f8fafc; 
+            --card: #ffffff; 
+            --border: #edf2f7; 
+            --primary: #0077b6; 
+            --accent: #00b4d8; 
+            --danger: #ff4d4d;
+            --success: #1eb853;
+            --warning: #f59e0b;
+            --text-main: #1a202c;
+            --text-sub: #718096;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        body { 
+            margin: 0; 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: var(--bg); 
+            color: var(--text-main);
+            padding: 20px 16px;
+        }
+
+        .container { max-width: 500px; margin: 0 auto; }
+        
+        h2 { font-size: 22px; font-weight: 700; color: var(--primary); text-align: center; margin-bottom: 25px; }
+
+        /* --- Form Styling --- */
+        .admin-card {
+            background: var(--card); border-radius: 20px; padding: 20px;
+            border: 1px solid var(--border); box-shadow: var(--shadow);
+            margin-bottom: 30px;
+        }
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-size: 13px; font-weight: 700; color: var(--text-sub); margin-bottom: 6px; }
+        .form-input {
+            width: 100%; border: 1px solid var(--border); padding: 12px 14px;
+            border-radius: 12px; font-size: 14px; font-weight: 600; outline: none;
+            box-sizing: border-box; transition: border 0.2s;
+        }
+        .form-input:focus { border-color: var(--primary); }
+        .form-input:disabled { background: #f1f5f9; color: var(--text-sub); cursor: not-allowed; }
+        
+        .submit-btn {
+            width: 100%; background: var(--primary); color: white; border: none;
+            padding: 14px; border-radius: 12px; font-size: 15px; font-weight: 700;
+            cursor: pointer; transition: background 0.2s; margin-top: 10px;
+        }
+        .submit-btn:hover { background: var(--accent); }
+        .submit-btn.edit-mode { background: var(--warning); }
+
+        /* --- Member List Styling --- */
+        .list-section h3 { font-size: 16px; font-weight: 700; color: var(--text-main); margin-bottom: 15px; }
+        .member-card {
+            background: var(--card); border-radius: 16px; padding: 16px;
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 12px; border: 1px solid var(--border); box-shadow: var(--shadow);
+        }
+        .member-info h4 { margin: 0; font-size: 15px; font-weight: 700; color: var(--text-main); }
+        .member-info p { margin: 4px 0 0 0; font-size: 13px; font-weight: 600; color: var(--primary); }
+        .badge { background: #e8fbf0; color: var(--success); padding: 4px 8px; border-radius: 8px; font-size: 12px; font-weight: 700; margin-left: 8px; }
+        
+        .action-btns { display: flex; gap: 8px; }
+        .edit-btn {
+            background: #fef3c7; color: var(--warning); border: none;
+            padding: 8px 12px; border-radius: 8px; font-size: 12px;
+            font-weight: 700; cursor: pointer;
+        }
+        .edit-btn:hover { background: var(--warning); color: white; }
+
+        .delete-btn {
+            background: #fff1f1; color: var(--danger); border: none;
+            padding: 8px 12px; border-radius: 8px; font-size: 12px;
+            font-weight: 700; cursor: pointer;
+        }
+        .delete-btn:hover { background: var(--danger); color: white; }
+
+        .spinner { width: 30px; height: 30px; border: 3px solid #f3f3f3; border-top: 3px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin: 20px auto; display: block; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>🛠️ Coupon Admin Panel</h2>
+
+    <div class="admin-card">
+        <form id="couponForm">
+            <div class="form-group">
+                <label>Influencer / Member Name</label>
+                <input type="text" id="memberName" class="form-input" placeholder="e.g. Madhavan" required>
+            </div>
+            <div class="form-group">
+                <label>Custom Coupon Code</label>
+                <input type="text" id="couponCode" class="form-input" placeholder="e.g. MADHU123" style="text-transform: uppercase;" required>
+            </div>
+            <div class="form-group">
+                <label>Discount Percentage (%)</label>
+                <input type="number" id="discountPercent" class="form-input" placeholder="e.g. 15" min="1" max="100" required>
+            </div>
+            <button type="submit" id="submitBtn" class="submit-btn">Add New Member Coupon</button>
+        </form>
+    </div>
+
+    <div class="list-section">
+        <h3>👥 Coupon Member List</h3>
+        <div id="loading" class="spinner"></div>
+        <div id="memberList"></div>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+    // ஃபயர்பேஸ் கான்ஃபிகரேஷன்
+    const firebaseConfig = {
+        databaseURL: "https://san-aqua-tech-default-rtdb.asia-southeast1.firebasedatabase.app/"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const couponForm = document.getElementById("couponForm");
+    const memberListDiv = document.getElementById("memberList");
+    const loadingSpinner = document.getElementById("loading");
+    const submitBtn = document.getElementById("submitBtn");
+    const couponCodeInput = document.getElementById("couponCode");
+
+    let isEditMode = false;
+
+    // Save or Update Coupon in Firebase
+    couponForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        
+        const name = document.getElementById("memberName").value.trim();
+        const code = couponCodeInput.value.trim().toUpperCase();
+        const percent = parseInt(document.getElementById("discountPercent").value);
+
+        if(code && percent) {
+            set(ref(db, 'coupons/' + code), {
+                influencerName: name,
+                couponCode: code,
+                discountPercentage: percent
+            }).then(() => {
+                if(isEditMode) {
+                    alert("Coupon details updated successfully!");
+                    isEditMode = false;
+                    submitBtn.innerText = "Add New Member Coupon";
+                    submitBtn.classList.remove("edit-mode");
+                    couponCodeInput.disabled = false;
+                } else {
+                    alert("Coupon added successfully for " + name);
+                }
+                couponForm.reset();
+            }).catch((err) => {
+                alert("Error: " + err.message);
+            });
+        }
+    });
+
+    // Global Edit Function
+    window.editCoupon = (name, code, percent) => {
+        isEditMode = true;
+        document.getElementById("memberName").value = name;
+        couponCodeInput.value = code;
+        document.getElementById("discountPercent").value = percent;
+        
+        couponCodeInput.disabled = true;
+        submitBtn.innerText = "Update Coupon Details ⚙️";
+        submitBtn.classList.add("edit-mode");
+        
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    // Global delete function
+    window.deleteCoupon = (code) => {
+        if(confirm("Delete coupon code: " + code + "?")) {
+            remove(ref(db, 'coupons/' + code));
+            if(isEditMode && couponCodeInput.value === code) {
+                isEditMode = false;
+                submitBtn.innerText = "Add New Member Coupon";
+                submitBtn.classList.remove("edit-mode");
+                couponCodeInput.disabled = false;
+                couponForm.reset();
+            }
+        }
+    };
+
+    // Fetch and Display Coupon Members from Firebase
+    onValue(ref(db, 'coupons'), (snapshot) => {
+        loadingSpinner.style.display = "none";
+        memberListDiv.innerHTML = "";
+        const data = snapshot.val();
+
+        if (!data) {
+            memberListDiv.innerHTML = "<p style='color:var(--text-sub); text-align:center; font-size:14px;'>No coupon codes generated yet.</p>";
+            return;
+        }
+
+        Object.keys(data).forEach((key) => {
+            const coupon = data[key];
+            
+            const safeName = coupon.influencerName.replace(/'/g, "\\'");
+            const safeCode = coupon.couponCode.replace(/'/g, "\\'");
+
+            memberListDiv.innerHTML += `
+                <div class="member-card">
+                    <div class="member-info">
+                        <h4>${coupon.influencerName}</h4>
+                        <p>${coupon.couponCode} <span class="badge">${coupon.discountPercentage}% OFF</span></p>
+                    </div>
+                    <div class="action-btns">
+                        <button class="edit-btn" onclick="editCoupon('${safeName}', '${safeCode}', ${coupon.discountPercentage})">Edit</button>
+                        <button class="delete-btn" onclick="deleteCoupon('${safeCode}')">Delete</button>
+                    </div>
+                </div>
+            `;
+        });
+    });
+</script>
+</body>
+</html>
