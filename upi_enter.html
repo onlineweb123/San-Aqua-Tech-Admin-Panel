@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>San Aqua Tech | Update UPI ID</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0077b6;
+            --bg: #f8fbff;
+            --card: #ffffff;
+            --text: #1e293b;
+        }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .admin-card {
+            background: var(--card);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+        }
+        h2 { color: var(--primary); margin-bottom: 20px; }
+        input {
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 16px;
+            outline: none;
+            box-sizing: border-box;
+        }
+        input:focus { border-color: var(--primary); }
+        button {
+            width: 100%;
+            padding: 15px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        button:active { transform: scale(0.98); }
+        .status { margin-top: 15px; font-size: 14px; font-weight: 600; }
+    </style>
+</head>
+<body>
+
+<div class="admin-card">
+    <h2>Update UPI ID 💳</h2>
+    <p style="color: #64748b; font-size: 14px;">Enter the new UPI ID for QR code generation</p>
+
+    <input type="text" id="upiInput" placeholder="e.g., name@okaxis">
+    <button id="saveBtn">Save & Update QR</button>
+
+    <div id="statusMsg" class="status"></div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+    // ஃபயர்பேஸ் கான்ஃபிகரேஷன்
+    const firebaseConfig = {
+        databaseURL: "https://san-aqua-tech-default-rtdb.asia-southeast1.firebasedatabase.app/"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const upiRef = ref(db, 'admin_settings/upi_config');
+
+    const upiInput = document.getElementById("upiInput");
+    const saveBtn = document.getElementById("saveBtn");
+    const statusMsg = document.getElementById("statusMsg");
+
+    // தற்போதைய UPI ID-ஐ காண்பிக்க
+    onValue(upiRef, (snapshot) => {
+        if (snapshot.exists()) {
+            upiInput.value = snapshot.val().upiId;
+        }
+    });
+
+    // புதிய UPI ID-ஐ சேமிக்க
+    saveBtn.onclick = () => {
+        const newUpi = upiInput.value.trim();
+
+        if (newUpi === "") {
+            statusMsg.style.color = "red";
+            statusMsg.innerText = "Please enter a valid UPI ID!";
+            return;
+        }
+
+        saveBtn.innerText = "Saving...";
+        saveBtn.disabled = true;
+
+        set(upiRef, {
+            upiId: newUpi,
+            lastUpdated: new Date().toISOString()
+        }).then(() => {
+            statusMsg.style.color = "green";
+            statusMsg.innerText = "Success! Cart QR updated.";
+            saveBtn.innerText = "Save & Update QR";
+            saveBtn.disabled = false;
+        }).catch((error) => {
+            statusMsg.style.color = "red";
+            statusMsg.innerText = "Error: " + error.message;
+            saveBtn.disabled = false;
+        });
+    };
+</script>
+
+</body>
+</html>
