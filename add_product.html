@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>San Aqua Tech | Unified Admin</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --primary: #0077b6; 
+            --primary-dark: #023e8a;
+            --danger: #ef4444; 
+            --success: #10b981; 
+            --bg: #f8fbff;
+        }
+        
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); padding: 20px; color: #1e293b; margin: 0; }
+        .container { max-width: 600px; margin: auto; }
+        
+        .admin-card { 
+            background: white; padding: 25px; border-radius: 24px; 
+            box-shadow: 0 10px 40px rgba(0, 119, 182, 0.08); 
+            border: 1px solid #e2e8f0; margin-bottom: 25px;
+        }
+        h2 { color: var(--primary); margin-top: 0; text-align: center; font-size: 22px; }
+        
+        input, textarea, select { 
+            width: 100%; padding: 14px; margin-bottom: 15px; 
+            border: 1px solid #e2e8f0; border-radius: 14px; 
+            outline: none; font-family: inherit; font-size: 14px;
+            transition: 0.3s; background: #fcfdfe;
+        }
+        input:focus, textarea:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(0, 119, 182, 0.1); }
+        
+        .tab-group { display: flex; gap: 10px; margin-bottom: 20px; }
+        .tab-btn {
+            flex: 1; padding: 12px; background: #e2e8f0; color: #475569;
+            border: none; border-radius: 12px; font-weight: 700; cursor: pointer; text-align: center;
+        }
+        .tab-btn.active { background: var(--primary); color: white; }
+
+        .btn-group { display: flex; gap: 10px; }
+        button { 
+            flex: 1; padding: 14px; background: var(--primary); color: white; 
+            border: none; border-radius: 14px; font-weight: 700; 
+            cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center;
+        }
+        button:active { transform: scale(0.96); }
+        button:disabled { opacity: 0.7; cursor: not-allowed; }
+        .cancel-btn { background: #cbd5e1; color: #475569; display: none; }
+
+        .spinner {
+            width: 18px; height: 18px; border: 3px solid rgba(255,255,255,0.3);
+            border-top: 3px solid white; border-radius: 50%;
+            animation: spin 0.8s linear infinite; display: none;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        .section-title { font-weight: 700; margin-bottom: 15px; color: #64748b; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }
+        .product-list { display: grid; gap: 12px; padding-bottom: 50px; }
+        .item-card { 
+            background: white; padding: 12px; border-radius: 20px; 
+            border: 1px solid #e2e8f0; display: flex; align-items: center; 
+            justify-content: space-between; transition: 0.3s;
+        }
+        .item-info { display: flex; align-items: center; gap: 12px; }
+        .item-card img { width: 55px; height: 55px; border-radius: 14px; object-fit: cover; background: #f1f5f9; }
+        .item-details b { display: block; font-size: 15px; color: #1e293b; }
+        .item-details span { font-size: 13px; color: var(--primary); font-weight: 700; }
+        
+        .action-btns { display: flex; gap: 6px; }
+        .edit-btn { background: #f0fdf4; color: var(--success); width: auto; padding: 10px 15px; font-size: 13px; border-radius: 10px; }
+        .del-btn { background: #fef2f2; color: var(--danger); width: auto; padding: 10px 15px; font-size: 13px; border-radius: 10px; }
+
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px); display: none; align-items: center;
+            justify-content: center; z-index: 1000; padding: 20px;
+        }
+        .modal-card {
+            background: white; width: 100%; max-width: 350px;
+            padding: 25px; border-radius: 24px; text-align: center;
+            animation: modalIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        @keyframes modalIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .modal-card h3 { margin: 0 0 10px 0; color: var(--danger); }
+        .modal-card p { font-size: 14px; color: #64748b; margin-bottom: 20px; }
+        .modal-input { text-align: center; letter-spacing: 2px; font-weight: 700; }
+        .modal-btns { display: flex; gap: 10px; margin-top: 10px; }
+        .secondary-btn { background: #f1f5f9; color: #475569; border-radius: 14px; }
+        .danger-btn { background: var(--danger); border-radius: 14px; }
+    </style>
+</head>
+<body>
+
+<div id="deleteModal" class="modal-overlay">
+    <div class="modal-card">
+        <h3>Security Check</h3>
+        <p>Enter Admin Secret Code to confirm deletion.</p>
+        <input type="password" id="secretInput" class="modal-input" placeholder="••••••••">
+        <div class="modal-btns">
+            <button class="secondary-btn" onclick="closeModal()">Cancel</button>
+            <button class="danger-btn" id="confirmDelBtn">Delete</button>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="admin-card">
+        <h2 id="formTitle">Add New Item</h2>
+        
+        <label style="font-size: 12px; font-weight: 700; color: #64748b;">CATEGORY</label>
+        <select id="pCategory" onchange="switchCategory()">
+            <option value="products">Machine (Store Page)</option>
+            <option value="spare_parts">Spare Part (Spares Page)</option>
+        </select>
+
+        <input type="hidden" id="editId">
+        <input type="text" id="pName" placeholder="Item Name">
+        <input type="number" id="pPrice" placeholder="Price (₹)">
+        <textarea id="pDesc" rows="2" placeholder="Details (e.g. Specification or Use)"></textarea>
+        <input type="text" id="pImg" placeholder="Paste Image / Google Drive Link">
+        
+        <div class="btn-group">
+            <button onclick="saveProduct()" id="saveBtn">
+                <span id="saveBtnText">Save Item</span>
+                <div class="spinner" id="saveBtnSpinner"></div>
+            </button>
+            <button onclick="cancelEdit()" id="cancelBtn" class="cancel-btn">Cancel</button>
+        </div>
+    </div>
+
+    <div class="tab-group">
+        <button class="tab-btn active" id="tabProducts" onclick="toggleTab('products')">Machines</button>
+        <button class="tab-btn" id="tabSpares" onclick="toggleTab('spare_parts')">Spare Parts</button>
+    </div>
+
+    <div class="section-title" id="listTitle">Live Machines Inventory</div>
+    <div class="product-list" id="productList"></div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, onValue, push, remove, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+    // ஃபயர்பேஸ் கான்ஃபிகரேஷன்
+    const firebaseConfig = {
+        databaseURL: "https://san-aqua-tech-default-rtdb.asia-southeast1.firebasedatabase.app/"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const SECRET_CODE = "9344165879";
+    let currentDeleteId = null;
+    let activeTab = 'products';
+
+    // --- SAVE / UPDATE ---
+    window.saveProduct = async function() {
+        const category = document.getElementById('pCategory').value;
+        const id = document.getElementById('editId').value;
+        const name = document.getElementById('pName').value;
+        const price = document.getElementById('pPrice').value;
+        const desc = document.getElementById('pDesc').value;
+        let img = document.getElementById('pImg').value;
+        
+        const saveBtn = document.getElementById('saveBtn');
+        const saveBtnText = document.getElementById('saveBtnText');
+        const saveBtnSpinner = document.getElementById('saveBtnSpinner');
+
+        if(!name || !price || !img) return alert("Please fill important fields!");
+
+        // Google Drive Link convertor
+        if(img.includes('drive.google.com')){
+            const match = img.match(/\/d\/(.+?)\//);
+            if(match && match[1]) img = `https://lh3.googleusercontent.com/d/${match[1]}`;
+        }
+
+        const data = { name, price: Number(price), desc, img };
+
+        saveBtn.disabled = true;
+        saveBtnText.style.display = "none";
+        saveBtnSpinner.style.display = "block";
+
+        try {
+            if(id) {
+                await update(ref(db, `${category}/${id}`), data);
+                alert("Updated Successfully!");
+            } else {
+                await push(ref(db, category), data);
+                alert("New Item Added Successfully!");
+            }
+            clearForm();
+        } catch(e) { 
+            alert("Error saving data: " + e.message); 
+        } finally {
+            saveBtn.disabled = false;
+            saveBtnText.style.display = "block";
+            saveBtnSpinner.style.display = "none";
+        }
+    };
+
+    // --- TAB SWITCH & RENDER LIST ---
+    window.toggleTab = (tab) => {
+        activeTab = tab;
+        document.getElementById('tabProducts').classList.toggle('active', tab === 'products');
+        document.getElementById('tabSpares').classList.toggle('active', tab === 'spare_parts');
+        document.getElementById('listTitle').innerText = tab === 'products' ? "Live Machines Inventory" : "Live Spare Parts Inventory";
+        loadData();
+    };
+
+    function loadData() {
+        onValue(ref(db, activeTab), (snapshot) => {
+            const listDiv = document.getElementById('productList');
+            listDiv.innerHTML = "";
+            if(!snapshot.exists()){
+                listDiv.innerHTML = "<p style='text-align:center; color:#94a3b8;'>No items available.</p>";
+                return;
+            }
+            snapshot.forEach((child) => {
+                const p = child.val();
+                const key = child.key;
+                listDiv.innerHTML += `
+                    <div class="item-card">
+                        <div class="item-info">
+                            <img src="${p.img}" onerror="this.src='https://via.placeholder.com/60?text=No+Img'">
+                            <div class="item-details">
+                                <b>${p.name}</b>
+                                <span>₹${p.price}</span>
+                            </div>
+                        </div>
+                        <div class="action-btns">
+                            <button class="edit-btn" onclick="editProduct('${key}', '${p.name}', '${p.price}', '${p.desc}', '${p.img}')">Edit</button>
+                            <button class="del-btn" onclick="openDeleteModal('${key}')">Delete</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }, { onlyOnce: false });
+    }
+
+    // --- EDIT ---
+    window.editProduct = (id, name, price, desc, img) => {
+        document.getElementById('editId').value = id;
+        document.getElementById('pCategory').value = activeTab;
+        document.getElementById('pName').value = name;
+        document.getElementById('pPrice').value = price;
+        document.getElementById('pDesc').value = desc;
+        document.getElementById('pImg').value = img;
+        
+        document.getElementById('formTitle').innerText = "Edit Item";
+        document.getElementById('saveBtnText').innerText = "Update Now";
+        document.getElementById('cancelBtn').style.display = "block";
+        window.scrollTo({top: 0, behavior: 'smooth'});
+    };
+
+    // --- DELETE MODAL ---
+    window.openDeleteModal = (id) => {
+        currentDeleteId = id;
+        document.getElementById('deleteModal').style.display = 'flex';
+        document.getElementById('secretInput').value = "";
+        document.getElementById('secretInput').focus();
+    };
+
+    window.closeModal = () => {
+        document.getElementById('deleteModal').style.display = 'none';
+        currentDeleteId = null;
+    };
+
+    document.getElementById('confirmDelBtn').onclick = async () => {
+        const enteredCode = document.getElementById('secretInput').value;
+        const confirmBtn = document.getElementById('confirmDelBtn');
+        
+        if(enteredCode === SECRET_CODE) {
+            confirmBtn.disabled = true;
+            try {
+                await remove(ref(db, `${activeTab}/${currentDeleteId}`));
+                alert("Item Deleted Successfully!");
+            } catch(e) {
+                alert("Error deleting item!");
+            } finally {
+                confirmBtn.disabled = false;
+                closeModal();
+            }
+        } else {
+            alert("Wrong Secret Code! Access Denied.");
+            document.getElementById('secretInput').value = "";
+        }
+    };
+
+    window.cancelEdit = () => clearForm();
+
+    function clearForm() {
+        document.getElementById('editId').value = "";
+        document.getElementById('pName').value = "";
+        document.getElementById('pPrice').value = "";
+        document.getElementById('pDesc').value = "";
+        document.getElementById('pImg').value = "";
+        document.getElementById('formTitle').innerText = "Add New Item";
+        document.getElementById('saveBtnText').innerText = "Save Item";
+        document.getElementById('cancelBtn').style.display = "none";
+    }
+
+    window.switchCategory = () => {
+        const category = document.getElementById('pCategory').value;
+        toggleTab(category);
+    };
+
+    // Initial load
+    loadData();
+</script>
+
+</body>
+</html>
